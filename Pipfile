@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = ">=0.99.0"
+pydantic = ">=1.10.9"
+mangum = ">=0.17.0"
+requests = "*"
+bs4 = "*"
+trafilatura = "*"
+lxml = "*"
+
+[dev-packages]
+uvicorn = "*"
+parameterized = "*"
+pytest = "*"
+pytest-watch = "*"
+
+[requires]
+python_version = "3.12"

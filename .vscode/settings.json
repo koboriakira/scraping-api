@@ -1,0 +1,15 @@
+{
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "always",
+      "source.organizeImports.ruff": "always"
+    }
+  },
+  "python.terminal.activateEnvInCurrentTerminal": true,
+  "python.testing.cwd": "test",
+  "python.testing.pytestEnabled": true,
+  "python.analysis.extraPaths": [
+    "./notion_api"
+  ],
+  "python.analysis.typeCheckingMode": "basic" // 新しいプロジェクトならstrictにしたい
+}
