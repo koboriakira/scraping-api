@@ -1,0 +1,657 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>空き状況カレンダー</title>
+  <link rel="stylesheet" media="all" href="/assets/admin/application-2bc93fa292c7f61afa54b44ab33280f7fdfd6e6116cc8ea7c2ed9566525f70ee.css" data-turbolinks-track="true" />
+  <script src="/assets/admin/sbox_layout-224aace18b0e6ac1deb89cdaa8876bc573cfc608bcfe8321dcee24f01bd5ee3d.js" media="all"></script>
+  <script type="text/javascript">
+  function loading(flag){
+    if(flag){
+      $('#loadingView').show();
+    }else{
+      $('#loadingView').hide();
+    }
+  }
+
+  function toNextWeek(apply_service_id, date){
+    getWeekDays(apply_service_id, date);
+  }
+  function toPrevWeek(apply_service_id, date){
+    getWeekDays(apply_service_id, date);
+  }
+
+  function showTab(self, num) {
+    var $tab = $(self).parents('.tab');
+    $tab.children('li').removeClass('on');
+    $(self).parent().addClass('on');
+    $tab.next('.tabContent').children('.tabConBody').hide();
+    $('.tabContent #tc'+num).show();
+    changeTitle(selectedLi());
+
+    var $displayCal = $('#top_tabs + .tabContent > .tabConBody:visible div.tabContent > .tabConBody:visible');
+    if ($.trim($displayCal.html()) !== '') return;
+    var apply_service_id = $displayCal.data('apply-service-id');
+    var join_date = $displayCal.data('join-date');
+    if (apply_service_id && join_date) getWeekDays(apply_service_id, join_date);
+  }
+
+  function selectedLi(){
+    return $('#top_tabs + .tabContent > .tabConBody:visible ul.tab > li.on');
+  }
+  function changeTitle($li){
+    var title = $li.data('title');
+    if (title) {
+      $('#page-title').html(title);
+    }
+  }
+
+  function getWeekDays(apply_service_id, join_date){
+    loading(true);
+    $.ajax({
+      type: 'get',
+      url: '/apply/calendar2?s_c=11',
+      data: {join_date: join_date, apply_service_id: apply_service_id},
+      dataType: 'script'
+    });
+  }
+
+  function selectJoinTime(self){
+    if($(self).hasClass('full')) return;
+
+      var tagId = $(self).parents('div.tabConBody').attr('id');
+      if ( 'tcb-2038' === tagId) {
+        openCurrentWindow(self); 
+      } else {
+        openNewWindow(self); 
+      }
+  }
+
+  function openCurrentWindow(self){
+    var $joinTime = window.opener.$('#apply_join_time');
+    if ($joinTime.val() != $(self).attr('data-join-time')){
+      $joinTime.val($(self).attr('data-join-time')).change();
+    }
+    window.opener.$('#apply_use_time').val($(self).attr('data-use-time'));
+    window.opener=null;
+    window.open('','_self');
+    window.close();
+  }
+
+  function openNewWindow(self){
+    var baseUrl = selectedLi().data('href');
+    baseUrl += '&join_time=' + $(self).data('join-time');
+    baseUrl += '&use_time=' + $(self).data('use-time');
+    window.open(baseUrl);
+    window.opener=null;
+    window.open('','_self');
+    window.close();
+  }
+
+</script>
+<style type="text/css">
+  td.empty{
+    background:#C5EFCE;
+    background:-webkit-gradient(linear,0% 0%,0% 100%,from(#C5EFCE),to(#B5DFBE));
+    background:-moz-linear-gradient(to bottom, #C5EFCE 0%,#B5DFBE 100%);
+    background: -o-linear-gradient(to bottom, #C5EFCE 0%,#B5DFBE 100%); /* Opera 11.1 - 12.0 */
+    background: linear-gradient(to bottom, #C5EFCE 0%,#B5DFBE 100%);
+    cursor: pointer;
+    /*color:#1C751D;*/
+    color:black;
+  }
+  td.a_little{
+    background:#FFCC99;
+    background:-webkit-gradient(linear,0% 0%,0% 100%,from(#FFCC99),to(#EFBC89));
+    background:-moz-linear-gradient(to bottom, #FFCC99 0%,#EFBC89 100%);
+    background: -o-linear-gradient(to bottom, #FFCC99 0%,#EFBC89 100%); /* Opera 11.1 - 12.0 */
+    background: linear-gradient(to bottom, #FFCC99 0%,#EFBC89 100%);
+    cursor: pointer;
+    color:black;
+  }
+  td.empty:hover{
+    background:-webkit-gradient(linear,0% 0%,0% 100%,from(#BFE9C8),to(#B5DFBE));
+    background:-moz-linear-gradient(to bottom, #BFE9C8 0%,#B5DFBE 100%);
+    background: -o-linear-gradient(to bottom, #BFE9C8 0%,#B5DFBE 100%); /* Opera 11.1 - 12.0 */
+    background: linear-gradient(to bottom, #BFE9C8 0%,#B5DFBE 100%);
+  }
+
+  td.a_little:hover{
+    background:-webkit-gradient(linear,0% 0%,0% 100%,from(#F9C694),to(#EFBC89));
+    background:-moz-linear-gradient(to bottom, #F9C694 0%,#EFBC89 100%);
+    background: -o-linear-gradient(to bottom, #F9C694 0%,#EFBC89 100%); /* Opera 11.1 - 12.0 */
+    background: linear-gradient(to bottom, #F9C694 0%,#EFBC89 100%);
+  }
+
+  td.full{
+    background-color:#FFC7CE;
+    /*color:#A6141A;*/
+    color:black;
+    cursor: no-drop;
+  }
+
+  /*
+  td.td-sat{
+    color: blue;
+  }
+  td.td-sun {
+    color: red;
+  }
+  td.td-hol{
+    color: red;
+  }
+  td.td-n{
+    color: #333;
+  }*/
+
+  .tb-calendar thead th.td-sat{
+    color: blue;
+  }
+  .tb-calendar thead th.td-sun, .tb-calendar thead th.td-hol {
+    color: red;
+  }
+
+  .week-navi{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    /*position: relative;*/
+    display: table;
+    width: 100%;
+  }
+  .week-navi > * {
+    display: table-cell;
+  }
+  .week-navi > .year {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 20px;
+  }
+  .week-navi > .prev-week {
+    text-align: left;
+  }
+  .week-navi > .next-week {
+    text-align: right;
+  }
+
+  body{
+    margin:10px;
+  }
+  .tb-calendar{
+    width: 100%;
+    border: 1px solid black;
+  }
+
+  .tb-calendar thead th{
+    text-align: center;
+    background-color: #ddd;
+    border: 1px solid black;
+    font-size: 18px;
+    padding: 5px 0;
+  }
+  .tb-calendar tbody td{
+    border: 1px solid black;
+    font-size: 18px;
+    padding: 5px;
+    text-align: center;
+  }
+  .tb-calendar tbody td:not(.time-row){
+    font-family: Meiryo,'ＭＳ Ｐゴシック',sans-serif,'メイリオ';
+    font-weight: bold;
+  }
+  .tb-calendar tbody td.time-row{
+    background-color: #D8E4BC;
+  }
+
+  #top_tabs + .tabContent > .tabConBody{
+    /*width: 470px;*/
+    vertical-align: middle;
+    text-align: center;
+    margin: auto;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="pgTitle clearfix">
+  <h2 id="page-title">鮨一新（ディナー 19時・テーブル席 ）</h2>
+</div>
+<div class="tabWrap mb10">
+  <ul class="tab" id="top_tabs">
+        <li class="">
+          <a href="javascript:;" onclick="showTab(this, 'sg_93')"><span>中国料理「桜華樓」</span></a>
+        </li>
+        <li class="">
+          <a href="javascript:;" onclick="showTab(this, 'sg_95')"><span>リストランテ「アル・ファーロ」</span></a>
+        </li>
+        <li class="">
+          <a href="javascript:;" onclick="showTab(this, 'sg_96')"><span>和食レストラン「木都里亭」</span></a>
+        </li>
+        <li class="on">
+          <a href="javascript:;" onclick="showTab(this, 'sg_355')"><span>鮨一新</span></a>
+        </li>
+  </ul>
+
+  <div class="tabContent">
+        <div class="tabConBody" id="tcsg_93" style="display:none;">
+
+          <div class="tabWrap mb10">
+  <ul class="tab" id="tabs">
+        <li class="on"
+            data-href="/apply/restaurant_empty_new?s=PWd6TjQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ディナー・フロア席)">
+          <a href="javascript:;" id="link-878" onclick="showTab(this, 'b-878')"><span>桜華樓(ディナー・フロア席)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PWt6TjQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ディナー・個室①)">
+          <a href="javascript:;" id="link-879" onclick="showTab(this, 'b-879')"><span>桜華樓(ディナー・個室①)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PUFETzQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ディナー・個室②)">
+          <a href="javascript:;" id="link-880" onclick="showTab(this, 'b-880')"><span>桜華樓(ディナー・個室②)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PUVETzQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ディナー・個室③)">
+          <a href="javascript:;" id="link-881" onclick="showTab(this, 'b-881')"><span>桜華樓(ディナー・個室③)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PUlETzQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ディナー・個室④)">
+          <a href="javascript:;" id="link-882" onclick="showTab(this, 'b-882')"><span>桜華樓(ディナー・個室④)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PU1ETzQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ディナー・個室⑤)">
+          <a href="javascript:;" id="link-883" onclick="showTab(this, 'b-883')"><span>桜華樓(ディナー・個室⑤)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PVFETzQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ランチ・フロア席)">
+          <a href="javascript:;" id="link-884" onclick="showTab(this, 'b-884')"><span>桜華樓(ランチ・フロア席)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PVVETzQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ランチ・個室①)">
+          <a href="javascript:;" id="link-885" onclick="showTab(this, 'b-885')"><span>桜華樓(ランチ・個室①)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PVlETzQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ランチ・個室②)">
+          <a href="javascript:;" id="link-886" onclick="showTab(this, 'b-886')"><span>桜華樓(ランチ・個室②)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PWNETzQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ランチ・個室③)">
+          <a href="javascript:;" id="link-887" onclick="showTab(this, 'b-887')"><span>桜華樓(ランチ・個室③)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PWdETzQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ランチ・個室④)">
+          <a href="javascript:;" id="link-888" onclick="showTab(this, 'b-888')"><span>桜華樓(ランチ・個室④)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PWtETzQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="桜華樓(ランチ・個室⑤)">
+          <a href="javascript:;" id="link-889" onclick="showTab(this, 'b-889')"><span>桜華樓(ランチ・個室⑤)</span></a>
+        </li>
+  </ul>
+
+  <div class="tabContent">
+        <div class="tabConBody" id="tcb-878"
+             data-apply-service-id="878"
+             data-join-date="2024-09-22"
+             style="">
+          
+        </div>
+        <div class="tabConBody" id="tcb-879"
+             data-apply-service-id="879"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-880"
+             data-apply-service-id="880"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-881"
+             data-apply-service-id="881"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-882"
+             data-apply-service-id="882"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-883"
+             data-apply-service-id="883"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-884"
+             data-apply-service-id="884"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-885"
+             data-apply-service-id="885"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-886"
+             data-apply-service-id="886"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-887"
+             data-apply-service-id="887"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-888"
+             data-apply-service-id="888"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-889"
+             data-apply-service-id="889"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+  </div>
+</div>
+
+        </div>
+        <div class="tabConBody" id="tcsg_95" style="display:none;">
+
+          <div class="tabWrap mb10">
+  <ul class="tab" id="tabs">
+        <li class="on"
+            data-href="/apply/restaurant_empty_new?s=PVl6TjQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="アル・ファーロ(ディナー)">
+          <a href="javascript:;" id="link-876" onclick="showTab(this, 'b-876')"><span>アル・ファーロ(ディナー)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PVFUTzQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="アル・ファーロ(ランチ)">
+          <a href="javascript:;" id="link-894" onclick="showTab(this, 'b-894')"><span>アル・ファーロ(ランチ)</span></a>
+        </li>
+  </ul>
+
+  <div class="tabContent">
+        <div class="tabConBody" id="tcb-876"
+             data-apply-service-id="876"
+             data-join-date="2024-09-22"
+             style="">
+          
+        </div>
+        <div class="tabConBody" id="tcb-894"
+             data-apply-service-id="894"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+  </div>
+</div>
+
+        </div>
+        <div class="tabConBody" id="tcsg_96" style="display:none;">
+
+          <div class="tabWrap mb10">
+  <ul class="tab" id="tabs">
+        <li class="on"
+            data-href="/apply/restaurant_empty_new?s=PWNqTjQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="木都里亭(ディナー)">
+          <a href="javascript:;" id="link-867" onclick="showTab(this, 'b-867')"><span>木都里亭(ディナー)</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=PWdqTjQwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="木都里亭(ランチ)">
+          <a href="javascript:;" id="link-868" onclick="showTab(this, 'b-868')"><span>木都里亭(ランチ)</span></a>
+        </li>
+  </ul>
+
+  <div class="tabContent">
+        <div class="tabConBody" id="tcb-867"
+             data-apply-service-id="867"
+             data-join-date="2024-09-22"
+             style="">
+          
+        </div>
+        <div class="tabConBody" id="tcb-868"
+             data-apply-service-id="868"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+  </div>
+</div>
+
+        </div>
+        <div class="tabConBody" id="tcsg_355" style="">
+
+          <div class="tabWrap mb10">
+  <ul class="tab" id="tabs">
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=M01ETXkwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="鮨一新（ディナー 17時・テーブル席 ）">
+          <a href="javascript:;" id="link-2037" onclick="showTab(this, 'b-2037')"><span>鮨一新（ディナー 17時・テーブル席 ）</span></a>
+        </li>
+        <li class="on"
+            data-href="/apply/restaurant_empty_new?s=NE1ETXkwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="鮨一新（ディナー 19時・テーブル席 ）">
+          <a href="javascript:;" id="link-2038" onclick="showTab(this, 'b-2038')"><span>鮨一新（ディナー 19時・テーブル席 ）</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=NU1ETXkwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="鮨一新（ディナー 17時・カウンター席 ） ">
+          <a href="javascript:;" id="link-2039" onclick="showTab(this, 'b-2039')"><span>鮨一新（ディナー 17時・カウンター席 ） </span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=d1FETXkwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="鮨一新（ディナー 19時・カウンター席 ） ">
+          <a href="javascript:;" id="link-2040" onclick="showTab(this, 'b-2040')"><span>鮨一新（ディナー 19時・カウンター席 ） </span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=eFFETXkwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="鮨一新（ランチ・カウンター席 ）">
+          <a href="javascript:;" id="link-2041" onclick="showTab(this, 'b-2041')"><span>鮨一新（ランチ・カウンター席 ）</span></a>
+        </li>
+        <li class=""
+            data-href="/apply/restaurant_empty_new?s=eVFETXkwRFpwWlNaMUpIZDlrSGR3MVda"
+            data-title="鮨一新（ランチ・テーブル席 ） ">
+          <a href="javascript:;" id="link-2042" onclick="showTab(this, 'b-2042')"><span>鮨一新（ランチ・テーブル席 ） </span></a>
+        </li>
+  </ul>
+
+  <div class="tabContent">
+        <div class="tabConBody" id="tcb-2037"
+             data-apply-service-id="2037"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-2038"
+             data-apply-service-id="2038"
+             data-join-date="2024-09-22"
+             style="">
+          <div class="week-navi">
+  <span class="prev-week"><input id="prevWeek" type="button" value="＜前の週" onclick="toPrevWeek(2038, '2024-09-21');" class="button prev-week" /></span>
+  <span class="year">2024年</span>
+  <span class="next-week"><input id="nextWeek" type="button" value="次の週＞" onclick="toNextWeek(2038, '2024-09-29');" class="button next-week" /></span>
+</div>
+<table class="tb-calendar mb10">
+  <thead>
+  <tr>
+    <th>日付</th>
+        <th class="td-hol">09月22日</th>
+        <th class="td-hol">09月23日</th>
+        <th class="td-n">09月24日</th>
+        <th class="td-n">09月25日</th>
+        <th class="td-n">09月26日</th>
+        <th class="td-n">09月27日</th>
+        <th class="td-sat">09月28日</th>
+  </tr>
+  <tr>
+    <th>曜日</th>
+        <th class="td-hol">日</th>
+        <th class="td-hol">月</th>
+        <th class="td-n">火</th>
+        <th class="td-n">水</th>
+        <th class="td-n">木</th>
+        <th class="td-n">金</th>
+        <th class="td-sat">土</th>
+  </tr>
+  </thead>
+  <tbody>
+
+      <tr>
+        <td class="time-row">17:00~</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-22" data-use-time="17:00">☓</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-23" data-use-time="17:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-24" data-use-time="17:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-25" data-use-time="17:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-26" data-use-time="17:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-27" data-use-time="17:00">☓</td>
+            <td class="full td-sat" onclick="selectJoinTime(this);" data-join-time="2024-09-28" data-use-time="17:00">☓</td>
+      </tr>
+      <tr>
+        <td class="time-row">17:30~</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-22" data-use-time="17:30">☓</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-23" data-use-time="17:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-24" data-use-time="17:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-25" data-use-time="17:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-26" data-use-time="17:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-27" data-use-time="17:30">☓</td>
+            <td class="full td-sat" onclick="selectJoinTime(this);" data-join-time="2024-09-28" data-use-time="17:30">☓</td>
+      </tr>
+      <tr>
+        <td class="time-row">18:00~</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-22" data-use-time="18:00">☓</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-23" data-use-time="18:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-24" data-use-time="18:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-25" data-use-time="18:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-26" data-use-time="18:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-27" data-use-time="18:00">☓</td>
+            <td class="full td-sat" onclick="selectJoinTime(this);" data-join-time="2024-09-28" data-use-time="18:00">☓</td>
+      </tr>
+      <tr>
+        <td class="time-row">18:30~</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-22" data-use-time="18:30">☓</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-23" data-use-time="18:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-24" data-use-time="18:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-25" data-use-time="18:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-26" data-use-time="18:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-27" data-use-time="18:30">☓</td>
+            <td class="full td-sat" onclick="selectJoinTime(this);" data-join-time="2024-09-28" data-use-time="18:30">☓</td>
+      </tr>
+      <tr>
+        <td class="time-row">19:00~</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-22" data-use-time="19:00">☓</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-23" data-use-time="19:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-24" data-use-time="19:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-25" data-use-time="19:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-26" data-use-time="19:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-27" data-use-time="19:00">☓</td>
+            <td class="full td-sat" onclick="selectJoinTime(this);" data-join-time="2024-09-28" data-use-time="19:00">☓</td>
+      </tr>
+      <tr>
+        <td class="time-row">19:30~</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-22" data-use-time="19:30">☓</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-23" data-use-time="19:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-24" data-use-time="19:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-25" data-use-time="19:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-26" data-use-time="19:30">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-27" data-use-time="19:30">☓</td>
+            <td class="full td-sat" onclick="selectJoinTime(this);" data-join-time="2024-09-28" data-use-time="19:30">☓</td>
+      </tr>
+      <tr>
+        <td class="time-row">20:00~</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-22" data-use-time="20:00">☓</td>
+            <td class="full td-hol" onclick="selectJoinTime(this);" data-join-time="2024-09-23" data-use-time="20:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-24" data-use-time="20:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-25" data-use-time="20:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-26" data-use-time="20:00">☓</td>
+            <td class="full td-n" onclick="selectJoinTime(this);" data-join-time="2024-09-27" data-use-time="20:00">☓</td>
+            <td class="full td-sat" onclick="selectJoinTime(this);" data-join-time="2024-09-28" data-use-time="20:00">☓</td>
+      </tr>
+  </tbody>
+</table>
+
+<div class="mb10" style="text-align: left;">
+  <p>※ 「○」空き有り。「△」残りわずか。「☓」空きなし、利用不可日、受付期間外。<br />
+※空き有りと表示されている場合でも利用席数や前後の予約状況によってはご予約できない場合もあります。<br />
+※予約時刻から２時間の利用の可否をしめしております。</p>
+
+</div>
+        </div>
+        <div class="tabConBody" id="tcb-2039"
+             data-apply-service-id="2039"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-2040"
+             data-apply-service-id="2040"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-2041"
+             data-apply-service-id="2041"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+        <div class="tabConBody" id="tcb-2042"
+             data-apply-service-id="2042"
+             data-join-date="2024-09-22"
+             style="display:none;">
+          
+        </div>
+  </div>
+</div>
+
+        </div>
+  </div>
+</div>
+
+
+  <p align="center">
+    <input class="button button-primary" type="button" value="閉じる" onclick="window.opener=null;window.open('','_self');window.close();" >
+  </p>
+
+
+<div id="loadingView" class="ajax-indicator" style="display: none;">
+  <div></div>
+  <table class="loading">
+    <tr>
+      <td>
+        <div>
+          <img src="/assets/users/loading-15e2090fa296d47216afec6ada0cddd81e3a411172323c1d31934565d8589196.gif" alt="ajax-loader.gif" />
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
+</html>
+
+
+
+
+
+
